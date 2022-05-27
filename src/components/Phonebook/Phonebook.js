@@ -1,60 +1,69 @@
 import { Component } from 'react';
+import ContactsForm from './ContactsForm/ContactsForm';
 import Contact from './Contact/Contact';
-import { nanoid } from 'nanoid';
 
 class Phonebook extends Component {
-  state = { name: '', contacts: [] };
-
-  onChangeHandler = event =>
-    this.setState({
-      name: event.currentTarget.value,
-    });
-
-  onSubmit = event => {
-    event.preventDefault();
-    return this.setState(prevState => {
-      return {
-        contacts: [
-          ...prevState.contacts,
-          { name: prevState.name, id: nanoid() },
-        ],
-      };
-    });
+  state = {
+    name: '',
+    contacts: [
+      { id: 'id-1', name: 'Rosie Simpson', number: '459-12-56' },
+      { id: 'id-2', name: 'Hermione Kline', number: '443-89-12' },
+      { id: 'id-3', name: 'Eden Clements', number: '645-17-79' },
+      { id: 'id-4', name: 'Annie Copeland', number: '227-91-26' },
+    ],
+    number: '',
+    filter: '',
   };
 
-  isBtnDisabled = () => (this.state.name === '' ? true : false);
+  // onSubmit = event => {
+  //   event.preventDefault();
+  //   return this.setState(prevState => {
+  //     return {
+  //       contacts: [
+  //         ...prevState.contacts,
+  //         { name: prevState.name, id: nanoid(), number: prevState.number },
+  //       ],
+  //     };
+  //   });
+  // };
+
+  onSubmit = obj =>
+    this.setState(prevState => ({
+      contacts: [...prevState.contacts, obj],
+    }));
+
+  contactsFindHandler = event =>
+    this.setState({
+      filter: event.currentTarget.value,
+    });
+
+  getFilteredContacts = () => {
+    const requiredName = this.state.filter.toLowerCase();
+    return [
+      ...this.state.contacts.filter(contact =>
+        contact.name.toLowerCase().includes(requiredName)
+      ),
+    ];
+  };
 
   render() {
-    const { name, contacts } = this.state;
+    const { filter } = this.state;
     return (
       <div>
         <h1>Phonebook</h1>
-        <form>
-          <label>
-            Name
-            <input
-              value={name}
-              onChange={this.onChangeHandler}
-              type="text"
-              name="name"
-              pattern="^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$"
-              title="Name may contain only letters, apostrophe, dash and spaces. For example Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan"
-              required
-            />
-          </label>
-
-          <button
-            type="submit"
-            disabled={this.isBtnDisabled()}
-            onClick={this.onSubmit}
-          >
-            Add contact
-          </button>
-        </form>
+        <ContactsForm onSubmit={res => this.onSubmit(res)}></ContactsForm>
+        <label>
+          Find contacts by name
+          <input
+            type="text"
+            onChange={this.contactsFindHandler}
+            value={filter}
+          ></input>
+        </label>
         <p>Contacts</p>
         <ul>
-          {contacts.map(({ name, id }) => (
-            <Contact name={name} id={id}></Contact>
+          {this.getFilteredContacts().map(({ name, id, number }) => (
+            <Contact name={name} id={id} number={number}></Contact>
           ))}
         </ul>
       </div>
